@@ -8,6 +8,12 @@ spec:
   containers:
     - name: kubernetes-intro
       image: andrey4281/kubernetes-intro:0.0.1
+      readinessProbe:
+        httpGet:
+          path: /index.html
+          port: 80
+      livenessProbe:
+        tcpSocket: { port: 8000 }
       volumeMounts:
         - name: app
           mountPath: /app
