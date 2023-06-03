@@ -36,4 +36,5 @@
 6. Удалили Custom Resource (cr.yml) и проверили что отработала джоба по бэкапу данных
 7. Восстановили Custome Resource (cr.yml) и проверили что данные восстановились из бэкапа
 8. Отчет 
-
+![jobs](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/24e2c72e-54b2-4043-87a0-4555b89963c3)
+![databasedata](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/378c41de-a62f-4129-8dd4-3e1bc0bb6b54)
