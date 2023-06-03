@@ -26,3 +26,14 @@
 7. Создать namespace dev (01-namespace-dev.yaml)
 8. Создать Service Account jane в Namespace dev и дать jane роль admin в рамках Namespace dev (02-jane-service-account.yaml)
 9. Создать Service Account ken в Namespace dev и дать ken роль view в рамках Namespace dev (03-ken-service-account.yaml)
+
+домашнее задание 6 (kubernetes-security)
+1. Создать Custom Resource (cr.yml)
+2. Создать Custom Resource Definition (crd.yml)
+3. Добавить валидацию в секцию spec описания ресурса (Custom Resource Definition) (crd.yml)
+4. Создать mysql-operator (service-account.yml, role.yml, role-binding.yml, deploy-operator.yml)
+5. Вставили тестовые данные в созданный mysql
+6. Удалили Custom Resource (cr.yml) и проверили что отработала джоба по бэкапу данных
+7. Восстановили Custome Resource (cr.yml) и проверили что данные восстановились из бэкапа
+8. Отчет 
+
