@@ -41,6 +41,8 @@ kubectl apply -f nginx-deployment.yaml
 6. Устанавливаем exporter для nginx
 helm upgrade --install prometheus-nginx-exporter prometheus-community/prometheus-nginx-exporter -n monitoring -f nginx-exporter.yaml
 7. График из графаны:
+   ![количество_соеденений_графана](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/66f6e10c-d2a1-42b4-91e8-bd0441c81444)
+
 
 
 
