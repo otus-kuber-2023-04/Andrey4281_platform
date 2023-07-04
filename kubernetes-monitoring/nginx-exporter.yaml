@@ -96,7 +96,7 @@ serviceMonitor:
   path: ""
   # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
   additionalLabels:
-    release: "stack"
+    release: "kube-prometheus-stack"
   # Set timeout for scrape
   timeout: 10s
   # Set of labels to transfer on the Kubernetes Service onto the target.
