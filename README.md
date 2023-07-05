@@ -38,3 +38,25 @@
 8. Отчет 
 ![jobs](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/24e2c72e-54b2-4043-87a0-4555b89963c3)
 ![databasedata](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/378c41de-a62f-4129-8dd4-3e1bc0bb6b54)
+
+
+
+домашнее задание 8 (kubernetes-monitoring)
+1. Создаем namespace куда будет устанавливать prometheus-stack
+kubectl apply -f namespace-monitoring.yaml
+2. Добавляем репозиторий для установки prometheus-stack из хэлма
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+3. Устанавливаем весь prometheus-stack при помощи хэлма
+helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring
+4. Создал образ nginx с endpoint-ом для метрик на основе образа из первого занятия см (web)
+5. Развернул nginx c endpoint-ом для мониторинга
+kubectl apply -f nginx-deployment.yaml
+6. Устанавливаем exporter для nginx
+helm upgrade --install prometheus-nginx-exporter prometheus-community/prometheus-nginx-exporter -n monitoring -f nginx-exporter.yaml
+7. График из графаны:
+   ![количество_соеденений_графана](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/66f6e10c-d2a1-42b4-91e8-bd0441c81444)
+
+
+
+
+
