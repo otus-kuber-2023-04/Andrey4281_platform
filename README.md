@@ -113,7 +113,8 @@ g) Прошел проверку на создания namespace microservices-d
 5. Работа с сущностям, которыми управляет helm-operator - HelmRelease
 a) Создал crd для adservice (пример в методичке с fronend не рабочий, для его работоспособности нужно сперва установить компоненты Istio, и crd для Prometheus (ServiceMonitor))
 b) Обновление хэлм чарта adservice на adservice-hipster
-ТУТ КАРТИНКА ДОЛЖНА БЫТЬ!!!
+![Обновление для adservice](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/95c26165-e9b2-47d7-8bc1-810c2d42a428)
+
 b) внес изменения в исходный код микросервиса frontend и пересобрал образ
 c) Добавил манифесты HelmRelease для всех микросервисов входящих в
    состав HipsterShop
@@ -143,12 +144,16 @@ a) Добавил манифет для ресурса canary
 canary.yaml
 b) Проводим релиз frontend:
 Было:
+![release_failed](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/a632b793-3eda-4746-acec-59a08caaf1db)
 
 Стало после правки load-generator (неверно были указаны параметры ingress):
+![success](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/6bbeeaf0-da20-4445-80a3-ebe46e916f26)
 
 
-Ссылка на репу с инфра кодом:
+**Ссылка на репу с инфра кодом:**
 https://gitlab.com/Andrey4281/microservices-demo/-/tree/master/deploy
+
+
 kubectl describe canary frontend -n microservices-demo``
 fluxctl --k8s-fwd-ns flux sync
 
