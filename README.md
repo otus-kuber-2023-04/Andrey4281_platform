@@ -110,6 +110,45 @@ helm upgrade --install helm-operator fluxcd/helm-operator -f helm-operator.value
 e) Установил fluxctl на локальную машину
 И добавил ssh ключ для доступа к gitlab
 g) Прошел проверку на создания namespace microservices-demo
+5. Работа с сущностям, которыми управляет helm-operator - HelmRelease
+a) Создал crd для adservice (пример в методичке с fronend не рабочий, для его работоспособности нужно сперва установить компоненты Istio, и crd для Prometheus (ServiceMonitor))
+b) Обновление хэлм чарта adservice на adservice-hipster
+ТУТ КАРТИНКА ДОЛЖНА БЫТЬ!!!
+b) внес изменения в исходный код микросервиса frontend и пересобрал образ
+c) Добавил манифесты HelmRelease для всех микросервисов входящих в
+   состав HipsterShop
+6. Canary deployments с Flagger и Istio
+a) Установка Istio:
+istioctl install --set profile=demo
+C prometheus:
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.18/samples/addons/prometheus.yaml
+b) Установка Flagger:
+helm repo add flagger https://flagger.app
+kubectl apply -f https://raw.githubusercontent.com/weaveworks/flagger/master/artifacts/flagger/crd.yaml
+helm upgrade --install flagger flagger/flagger \
+--namespace=istio-system \
+--set crd.create=false \
+--set meshProvider=istio \
+--set metricsServer=http://prometheus:9090
+7. Istio | Sidecar Injection:
+a) Добавил метку istio-injection: enabled в описание namespace microservices-demo
+b) Пересоздел поды и проверил что в подах появился side-car-container c envoy
+   kubectl delete pods --all -n microservices-demo
+8. Доступ к frontend:
+a) Добавил ресурсу VirtualService и Gateway
+для микросервиса frontend
+b) Перенес ресурсы VirtualService и Gateway в хэлм чарт для frontend
+9. Flagger | Canary:
+a) Добавил манифет для ресурса canary
+canary.yaml
+b) Проводим релиз frontend:
+Было:
+
+Стало после правки load-generator (неверно были указаны параметры ingress):
+
+kubectl describe canary frontend -n microservices-demo``
+fluxctl --k8s-fwd-ns flux sync
+
 
 
 
