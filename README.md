@@ -146,6 +146,9 @@ b) Проводим релиз frontend:
 
 Стало после правки load-generator (неверно были указаны параметры ingress):
 
+
+Ссылка на репу с инфра кодом:
+https://gitlab.com/Andrey4281/microservices-demo/-/tree/master/deploy
 kubectl describe canary frontend -n microservices-demo``
 fluxctl --k8s-fwd-ns flux sync
 
