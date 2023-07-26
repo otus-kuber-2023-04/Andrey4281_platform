@@ -90,7 +90,72 @@ kubectl apply -f nginx-deployment.yaml
 6. Устанавливаем exporter для nginx
 helm upgrade --install prometheus-nginx-exporter prometheus-community/prometheus-nginx-exporter -n monitoring -f nginx-exporter.yaml
 7. График из графаны:
-   ![количество_соеденений_графана](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/66f6e10c-d2a1-42b4-91e8-bd0441c81444)
+   ![количество_соеденений_графана](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/66f6e10c-d2a1-42b4-91e8-bd0441c81444)<
+
+домашнее задание 9 (kubernetes-gitops)
+1. Добавил в SaaS GitLab публичный проект microservices-demo
+2. Добавил хэлм чарты для каждого микросервиса (deploy/charts)
+3. Собрал докер образы для каждого микросервиса и поместил их в docker hub
+4. Установка Flux:
+a) Установим CRD, добавляющую в кластер новый ресурс - HelmRelease:
+kubectl apply -f kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/crds.yaml
+https://github.com/fluxcd/helm-operator-get-started оно (потом убрать)
+b) Добавим официальный репозиторий Flux:
+helm repo add fluxcd https://charts.fluxcd.io
+c) Установка flux:
+kubectl apply -f namespace-flux.yaml
+helm upgrade --install flux fluxcd/flux -f flux.values.yaml --namespace flux
+d) Установка helm-operator:
+helm upgrade --install helm-operator fluxcd/helm-operator -f helm-operator.values.yaml --namespace flux
+e) Установил fluxctl на локальную машину
+И добавил ssh ключ для доступа к gitlab
+g) Прошел проверку на создания namespace microservices-demo
+5. Работа с сущностям, которыми управляет helm-operator - HelmRelease
+a) Создал crd для adservice (пример в методичке с fronend не рабочий, для его работоспособности нужно сперва установить компоненты Istio, и crd для Prometheus (ServiceMonitor))
+b) Обновление хэлм чарта adservice на adservice-hipster
+![Обновление для adservice](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/95c26165-e9b2-47d7-8bc1-810c2d42a428)
+
+b) внес изменения в исходный код микросервиса frontend и пересобрал образ
+c) Добавил манифесты HelmRelease для всех микросервисов входящих в
+   состав HipsterShop
+6. Canary deployments с Flagger и Istio
+a) Установка Istio:
+istioctl install --set profile=demo
+C prometheus:
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.18/samples/addons/prometheus.yaml
+b) Установка Flagger:
+helm repo add flagger https://flagger.app
+kubectl apply -f https://raw.githubusercontent.com/weaveworks/flagger/master/artifacts/flagger/crd.yaml
+helm upgrade --install flagger flagger/flagger \
+--namespace=istio-system \
+--set crd.create=false \
+--set meshProvider=istio \
+--set metricsServer=http://prometheus:9090
+7. Istio | Sidecar Injection:
+a) Добавил метку istio-injection: enabled в описание namespace microservices-demo
+b) Пересоздел поды и проверил что в подах появился side-car-container c envoy
+   kubectl delete pods --all -n microservices-demo
+8. Доступ к frontend:
+a) Добавил ресурсу VirtualService и Gateway
+для микросервиса frontend
+b) Перенес ресурсы VirtualService и Gateway в хэлм чарт для frontend
+9. Flagger | Canary:
+a) Добавил манифет для ресурса canary
+canary.yaml
+b) Проводим релиз frontend:
+Было:
+![release_failed](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/a632b793-3eda-4746-acec-59a08caaf1db)
+
+Стало после правки load-generator (неверно были указаны параметры ingress):
+![success](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/6bbeeaf0-da20-4445-80a3-ebe46e916f26)
+
+
+**Ссылка на репу с инфра кодом:**
+https://gitlab.com/Andrey4281/microservices-demo/-/tree/master/deploy
+
+
+kubectl describe canary frontend -n microservices-demo``
+fluxctl --k8s-fwd-ns flux sync
 
 
 
