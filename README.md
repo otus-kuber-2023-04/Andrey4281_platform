@@ -76,6 +76,19 @@ helm upgrade --install hipster-shop kubernetes-templating/hipster-shop --namespa
    kubectl apply -k kubernetes-templating/kustomize/overrides/hipster-shop-prod (пример установки сервиса на прод)
 
 
+домашнее задание 6 (kubernetes-security)
+1. Создать Custom Resource (cr.yml)
+2. Создать Custom Resource Definition (crd.yml)
+3. Добавить валидацию в секцию spec описания ресурса (Custom Resource Definition) (crd.yml)
+4. Создать mysql-operator (service-account.yml, role.yml, role-binding.yml, deploy-operator.yml)
+5. Вставили тестовые данные в созданный mysql
+6. Удалили Custom Resource (cr.yml) и проверили что отработала джоба по бэкапу данных
+7. Восстановили Custome Resource (cr.yml) и проверили что данные восстановились из бэкапа
+8. Отчет 
+![jobs](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/24e2c72e-54b2-4043-87a0-4555b89963c3)
+![databasedata](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/378c41de-a62f-4129-8dd4-3e1bc0bb6b54)
+
+
 
 домашнее задание 8 (kubernetes-monitoring)
 1. Создаем namespace куда будет устанавливать prometheus-stack
