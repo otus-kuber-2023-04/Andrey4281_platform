@@ -99,46 +99,47 @@ kubectl apply -f kubernetes-vault/namespace-vault.yaml
  helm upgrade --install -f kubernetes-vault/consul-values.yaml consul-helm kubernetes-vault/consul-1.2.0/consul/ -n vault
 3. Устанавливаем в кластер vault
 helm upgrade --install -f kubernetes-vault/vault-values.yaml vault kubernetes-vault/vault-0.25.0/vault/ -n vault
-КАРТИНКА ПОСЛЕ УСТАНОВКИ VAULT
-4. Инициализируем vault:
+![КАРТИНКА_ПОСЛЕ_УСТАНОВКИ_VAULT](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/34b39745-aecb-4d1d-a4a3-fd343be2f043)
+5. Инициализируем vault:
 kubectl exec -n vault -it vault-0 -- vault operator init --key-shares=1 --key-threshold=1
-КАРТИНКА ПОСЛЕ ИНИЦИАЛИЗАЦИИ
-5. Распечатываем поды:
+![КАРТИНКА_ПОСЛЕ_ИНИЦИАЛИЗАЦИИ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/eba8219b-450f-42fd-94d1-b19f766d31a9)
+7. Распечатываем поды:
 kubectl exec -n vault -it vault-0 -- vault operator unseal
 kubectl exec -n vault -it vault-1 -- vault operator unseal
 kubectl exec -n vault -it vault-2 -- vault operator unseal
-КАРТИНКА СО СТАТУСОМ ПОСЛЕ РАСПЕЧАТКИ
-6. Посмотрим список доступных авторизаций:
+![КАРТИНКА_СО_СТАТУСОМ_ПОСЛЕ_РАСПЕЧАТКИ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/93a07ee3-3462-47be-909f-90d2b75a5c51)
+9. Посмотрим список доступных авторизаций:
 kubectl exec -n vault -it vault-0 -- vault auth list
 Получим 403 ошибку
 Создадим алиас alias vault='kubectl exec -n vault -it vault-0 -- vault'
 Залогинимся по root токену:
 СПИСОК_АВТОРИЗАЦИЙ_ПОСЛЕ_ЛОГИНА.png
-7. Заведем секреты
+![СПИСОК_АВТОРИЗАЦИЙ_ПОСЛЕ_ЛОГИНА](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/fa427285-d3bb-45b5-b4f6-725fd14e058a)
+11. Заведем секреты
 vault secrets enable kv-v2
 vault secrets enable -path="otus" kv-v2
 vault kv put otus/otus-ro/config username='otus' password='asajkjkahs'
 vault kv put otus/otus-rw/config username='otus' password='asajkjkahs'
 vault read otus/data/otus-ro/config
 vault kv get otus/otus-rw/config
-ВЫВОД_КОМАНДЫ_ЧТЕНИЯ_СЕКРЕТА
-8. Включим авторизацию через k8s:
+![ВЫВОД_КОМАНДЫ_ЧТЕНИЯ_СЕКРЕТА](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/69bce657-945e-41b9-aa01-a967886a2838)
+12. Включим авторизацию через k8s:
 vault auth enable kubernetes
 vault auth list
-ОБНОВЛЕННЫЙ_СПИСОК_АВТОРИЗАЦИЙ.png
-9. Создадим yaml для ClusterRoleBinding:
+![ОБНОВЛЕННЫЙ_СПИСОК_АВТОРИЗАЦИЙ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/d47f0eb2-c643-43cd-9ff6-9d08ef92e0b7)
+14. Создадим yaml для ClusterRoleBinding:
 kubectl create serviceaccount vault-auth -n vault
 kubectl apply -f kubernetes-vault/vault-auth-service-account.yml
-10. Подготовим переменные для записи в конфиг кубер авторизации:
+15. Подготовим переменные для записи в конфиг кубер авторизации:
 a) Создаем объект kubernetes.io/service-account-token для serviceaccount vault-auth
 kubectl apply -f kubernetes-vault/service-account-token.yaml
 b) export VAULT_SA_NAME=sa1-token
 c) export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -n vault -o jsonpath="{.data.token}" | base64 --decode; echo)
 d) export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -n vault -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)
 e) export K8S_HOST=$(more ~/.kube/config | grep server |awk '/http/ {print $NF}')
-11. Запишем конфиг в vault
+16. Запишем конфиг в vault
 vault write auth/kubernetes/config token_reviewer_jwt="$SA_JWT_TOKEN" kubernetes_host="$K8S_HOST" kubernetes_ca_cert="$SA_CA_CRT"
-12. Создадим файл политики
+17. Создадим файл политики
 tee otus-policy.hcl <<EOF
 path "otus/otus-ro/*" {
 capabilities = ["read", "list"]
@@ -147,7 +148,7 @@ path "otus/otus-rw/*" {
 capabilities = ["read", "create", "list"]
 }
 EOF
-13. Создадим политику и роль в Vault:
+18. Создадим политику и роль в Vault:
 vault policy write otus-policy - <<EOF
 path "otus/data/otus-ro/*" {
     capabilities = ["read", "list"]
@@ -186,15 +187,14 @@ path "otus/data/otus-rw/*" {
     capabilities = ["read", "create", "list", "update"]
 }
 EOF
-ВЫВОД_ПРОВЕРКИ_АВТОРИЗАЦИИ.png
+![ВЫВОД_ПРОВЕРКИ_АВТОРИЗАЦИИ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/dd397010-11ed-457e-9438-ebefd1db3471)
 15. Use case использования авторизации
 через кубер:
 kubectl create configmap example-vault-agent-config --from-file=./configs-k8s/ -n vault
 kubectl get configmap example-vault-agent-config -o yaml -n vault
 kubectl apply -f example-k8s-spec.yaml --record -n vault
 kubectl -n vault exec -it vault-agent-example -c nginx-container -- cat /usr/share/nginx/html/index.html
-VAULT_ПОЛУЧИЛ_СЕКРЕТ.png
-
+![VAULT_ПОЛУЧИЛ_СЕКРЕТ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/ceae9487-3037-4ec7-9cc9-3da4d63c41e4)
 16. Cоздадим CA на базе vault
 vault secrets enable pki
 vault secrets tune -max-lease-ttl=87600h pki
@@ -214,6 +214,7 @@ vault write pki_int/intermediate/set-signed certificate=@/tmp/intermediate.cert.
 vault write pki_int/roles/example-dot-ru allowed_domains="example.ru" allow_subdomains=true max_ttl="720h"
 ault write pki_int/issue/example-dot-ru common_name="gitlab.example.ru" ttl="24h"
 ВЫДАЧА_СЕРТИФИКАТА.png
+![ВЫДАЧА_СЕРТИФИКАТА](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/71c8b8d2-2ce7-4480-a732-a1001a9b7297)
 vault write pki_int/revoke serial_number="21:4f:d9:64:48:43:47:01:fa:8f:0d:a2:a3:ec:e4:f1:8a:3b:7d:f6"
 
 Unseal Key 1: zNIIES1RDU9lxoclyWpAlUG+nEmo6e5uW162d1goqMk=
