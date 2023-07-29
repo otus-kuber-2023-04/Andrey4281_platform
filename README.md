@@ -195,8 +195,6 @@ kubectl apply -f example-k8s-spec.yaml --record -n vault
 kubectl -n vault exec -it vault-agent-example -c nginx-container -- cat /usr/share/nginx/html/index.html
 VAULT_ПОЛУЧИЛ_СЕКРЕТ.png
 
-Unseal Key 1: zNIIES1RDU9lxoclyWpAlUG+nEmo6e5uW162d1goqMk=
-Initial Root Token: hvs.3d5e6qlNIbDTZVxJrBLNuq0c
 16. Cоздадим CA на базе vault
 vault secrets enable pki
 vault secrets tune -max-lease-ttl=87600h pki
@@ -218,5 +216,5 @@ ault write pki_int/issue/example-dot-ru common_name="gitlab.example.ru" ttl="24h
 ВЫДАЧА_СЕРТИФИКАТА.png
 vault write pki_int/revoke serial_number="21:4f:d9:64:48:43:47:01:fa:8f:0d:a2:a3:ec:e4:f1:8a:3b:7d:f6"
 
-kubectl -n vault exec -it vault-0 /bin/sh
-kubectl cp pki_intermediate.csr vault/vault-0:./
+Unseal Key 1: zNIIES1RDU9lxoclyWpAlUG+nEmo6e5uW162d1goqMk=
+Initial Root Token: hvs.3d5e6qlNIbDTZVxJrBLNuq0c
