@@ -161,32 +161,32 @@ EOF
 
 vault write auth/kubernetes/role/otus bound_service_account_names=vault-auth bound_service_account_namespaces=vault policies=otus-policy ttl=224h
 
-14. Проверка работы авторизации
-kubectl run tmp --rm -i --tty --overrides='{ "spec": { "serviceAccount": "vault-auth" }  }' --image=alpine:3.7 --namespace=vault
-apk add curl jq
-vault policy read otus-policy
+14. Проверка работы авторизации<br>
+kubectl run tmp --rm -i --tty --overrides='{ "spec": { "serviceAccount": "vault-auth" }  }' --image=alpine:3.7 --namespace=vault<br>
+apk add curl jq<br>
+vault policy read otus-policy<br>
 
-VAULT_ADDR=http://vault:8200
-KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-TOKEN=$(curl -k -s --request POST --data '{"jwt": "'$KUBE_TOKEN'", "role": "otus"}' $VAULT_ADDR/v1/auth/kubernetes/login | jq '.auth.client_token' | awk -F\" '{print $2}')
+VAULT_ADDR=http://vault:8200<br>
+KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)<br>
+TOKEN=$(curl -k -s --request POST --data '{"jwt": "'$KUBE_TOKEN'", "role": "otus"}' $VAULT_ADDR/v1/auth/kubernetes/login | jq '.auth.client_token' | awk -F\" '{print $2}')<br>
 
 Проверка чтения:
-curl --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-ro/config
-curl --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-rw/config
-Проверка записи:
-curl --request POST --data '{"data": {"bar": "baz"}}' --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-ro/config
-curl --request POST --data '{"data": {"bar": "baz"}}' --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-rw/config
-curl --request POST --data '{"data": {"bar": "baz"}}' --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-rw/config1
-Запрос на изменение $VAULT_ADDR/v1/otus/data/otus-rw/config дает ошибку Pemission denied, тк в исходной политике нет прав на update. Чтобы были права на запись, нужно изменить исходную политику следующим образом (добавить права на "update):
-vault policy write otus-policy - <<EOF
-path "otus/data/otus-ro/*" {
-    capabilities = ["read", "list"]
-}
+curl --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-ro/config<br>
+curl --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-rw/config<br>
+Проверка записи:<br>
+curl --request POST --data '{"data": {"bar": "baz"}}' --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-ro/config<br>
+curl --request POST --data '{"data": {"bar": "baz"}}' --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-rw/config<br>
+curl --request POST --data '{"data": {"bar": "baz"}}' --header "X-Vault-Token:hvs.CAESIN-1KY1IR11g_5ZVJbAHWzPLCjBnG8zBto0Gr8vg2Rd7Gh4KHGh2cy5CWGxlTUNOYjhHZjlBV3B1UEJ1WFBLRHk" $VAULT_ADDR/v1/otus/data/otus-rw/config1<br>
+Запрос на изменение $VAULT_ADDR/v1/otus/data/otus-rw/config дает ошибку Pemission denied, тк в исходной политике нет прав на update. Чтобы были права на запись, нужно изменить исходную политику следующим образом (добавить права на "update):<br>
+vault policy write otus-policy - <<EOF<br>
+path "otus/data/otus-ro/*" {<br>
+    capabilities = ["read", "list"]<br>
+}<br>
 
-path "otus/data/otus-rw/*" {
-    capabilities = ["read", "create", "list", "update"]
-}
-EOF
+path "otus/data/otus-rw/*" {<br>
+    capabilities = ["read", "create", "list", "update"]<br>
+}<br>
+EOF<br>
 ![ВЫВОД_ПРОВЕРКИ_АВТОРИЗАЦИИ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/dd397010-11ed-457e-9438-ebefd1db3471)
 15. Use case использования авторизации<br>
 через кубер:<br>
