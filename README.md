@@ -188,12 +188,12 @@ path "otus/data/otus-rw/*" {
 }
 EOF
 ![ВЫВОД_ПРОВЕРКИ_АВТОРИЗАЦИИ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/dd397010-11ed-457e-9438-ebefd1db3471)
-15. Use case использования авторизации
-через кубер:
-kubectl create configmap example-vault-agent-config --from-file=./configs-k8s/ -n vault
-kubectl get configmap example-vault-agent-config -o yaml -n vault
-kubectl apply -f example-k8s-spec.yaml --record -n vault
-kubectl -n vault exec -it vault-agent-example -c nginx-container -- cat /usr/share/nginx/html/index.html
+15. Use case использования авторизации<br>
+через кубер:<br>
+kubectl create configmap example-vault-agent-config --from-file=./configs-k8s/ -n vault<br>
+kubectl get configmap example-vault-agent-config -o yaml -n vault<br>
+kubectl apply -f example-k8s-spec.yaml --record -n vault<br>
+kubectl -n vault exec -it vault-agent-example -c nginx-container -- cat /usr/share/nginx/html/index.html<br>
 ![VAULT_ПОЛУЧИЛ_СЕКРЕТ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/ceae9487-3037-4ec7-9cc9-3da4d63c41e4)
 16. Cоздадим CA на базе vault
 vault secrets enable pki
