@@ -161,7 +161,7 @@ EOF
 
 vault write auth/kubernetes/role/otus bound_service_account_names=vault-auth bound_service_account_namespaces=vault policies=otus-policy ttl=224h
 
-14. Проверка работы авторизации<br>
+18. Проверка работы авторизации<br>
 kubectl run tmp --rm -i --tty --overrides='{ "spec": { "serviceAccount": "vault-auth" }  }' --image=alpine:3.7 --namespace=vault<br>
 apk add curl jq<br>
 vault policy read otus-policy<br>
@@ -188,34 +188,34 @@ path "otus/data/otus-rw/*" {<br>
 }<br>
 EOF<br>
 ![ВЫВОД_ПРОВЕРКИ_АВТОРИЗАЦИИ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/dd397010-11ed-457e-9438-ebefd1db3471)
-15. Use case использования авторизации<br>
+19. Use case использования авторизации<br>
 через кубер:<br>
 kubectl create configmap example-vault-agent-config --from-file=./configs-k8s/ -n vault<br>
 kubectl get configmap example-vault-agent-config -o yaml -n vault<br>
 kubectl apply -f example-k8s-spec.yaml --record -n vault<br>
 kubectl -n vault exec -it vault-agent-example -c nginx-container -- cat /usr/share/nginx/html/index.html<br>
 ![VAULT_ПОЛУЧИЛ_СЕКРЕТ](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/ceae9487-3037-4ec7-9cc9-3da4d63c41e4)
-16. Cоздадим CA на базе vault
-vault secrets enable pki
-vault secrets tune -max-lease-ttl=87600h pki
-vault write -field=certificate pki/root/generate/internal common_name="exmaple.ru" ttl=87600h > CA_cert.crt
-Пропишем урлы для ca и отозванных сертификатов:
-vault write pki/config/urls issuing_certificates="http://vault:8200/v1/pki/ca" crl_distribution_points="http://vault:8200/v1/pki/crl"
-Cоздадим промежуточный сертификат:
-vault secrets enable --path=pki_int pki
-vault secrets tune -max-lease-ttl=87600h pki_int
-vault write -format=json pki_int/intermediate/generate/internal common_name="example.ru Intermediate Authority"| jq -r '.data.csr' > pki_intermediate.csr
-Пропишем промежуточный сертификат в vault: (ПОЛУЧИЛОСЬ КОПИРОВАТЬ ФАЙЛЫ ТОЛЬКО В /tmp В КОНТЕЙНЕРЕ ПОДА. КАК РЕШИТЬ НА ПРОДЕ?
-kubectl cp pki_intermediate.csr vault/vault-0:./tmp
-vault write -format=json pki/root/sign-intermediate csr=@/tmp/pki_intermediate.csr format=pem_bundle ttl="43800h" | jq -r '.data.certificate' > intermediate.cert.pem
-kubectl cp intermediate.cert.pem vault/vault-0:./tmp
-vault write pki_int/intermediate/set-signed certificate=@/tmp/intermediate.cert.pem
-Создадим и отзовем новые сертификаты:
-vault write pki_int/roles/example-dot-ru allowed_domains="example.ru" allow_subdomains=true max_ttl="720h"
-ault write pki_int/issue/example-dot-ru common_name="gitlab.example.ru" ttl="24h"
-ВЫДАЧА_СЕРТИФИКАТА.png
+20. Cоздадим CA на базе vault<br>
+vault secrets enable pki<br>
+vault secrets tune -max-lease-ttl=87600h pki<br>
+vault write -field=certificate pki/root/generate/internal common_name="exmaple.ru" ttl=87600h > CA_cert.crt<br>
+Пропишем урлы для ca и отозванных сертификатов:<br>
+vault write pki/config/urls issuing_certificates="http://vault:8200/v1/pki/ca" crl_distribution_points="http://vault:8200/v1/pki/crl"<br>
+Cоздадим промежуточный сертификат:<br>
+vault secrets enable --path=pki_int pki<br>
+vault secrets tune -max-lease-ttl=87600h pki_int<br>
+vault write -format=json pki_int/intermediate/generate/internal common_name="example.ru Intermediate Authority"| jq -r '.data.csr' > pki_intermediate.csr<br>
+Пропишем промежуточный сертификат в vault: (ПОЛУЧИЛОСЬ КОПИРОВАТЬ ФАЙЛЫ ТОЛЬКО В /tmp В КОНТЕЙНЕРЕ ПОДА. КАК РЕШИТЬ НА ПРОДЕ?<br>
+kubectl cp pki_intermediate.csr vault/vault-0:./tmp<br>
+vault write -format=json pki/root/sign-intermediate csr=@/tmp/pki_intermediate.csr format=pem_bundle ttl="43800h" | jq -r '.data.certificate' > intermediate.cert.pem<br>
+kubectl cp intermediate.cert.pem vault/vault-0:./tmp<br>
+vault write pki_int/intermediate/set-signed certificate=@/tmp/intermediate.cert.pem<br>
+Создадим и отзовем новые сертификаты:<br>
+vault write pki_int/roles/example-dot-ru allowed_domains="example.ru" allow_subdomains=true max_ttl="720h"<br>
+ault write pki_int/issue/example-dot-ru common_name="gitlab.example.ru" ttl="24h"<br>
+ВЫДАЧА_СЕРТИФИКАТА.png<br>
 ![ВЫДАЧА_СЕРТИФИКАТА](https://github.com/otus-kuber-2023-04/Andrey4281_platform/assets/43365575/71c8b8d2-2ce7-4480-a732-a1001a9b7297)
-vault write pki_int/revoke serial_number="21:4f:d9:64:48:43:47:01:fa:8f:0d:a2:a3:ec:e4:f1:8a:3b:7d:f6"
+vault write pki_int/revoke serial_number="21:4f:d9:64:48:43:47:01:fa:8f:0d:a2:a3:ec:e4:f1:8a:3b:7d:f6"<br>
 
 Unseal Key 1: zNIIES1RDU9lxoclyWpAlUG+nEmo6e5uW162d1goqMk=
 Initial Root Token: hvs.3d5e6qlNIbDTZVxJrBLNuq0c
