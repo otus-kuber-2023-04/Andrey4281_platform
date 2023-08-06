@@ -171,6 +171,27 @@ kubectl describe canary frontend -n microservices-demo``
 fluxctl --k8s-fwd-ns flux sync
 
 
-
-
-
+домашнее задание 11 (kubernetes-storage)
+Для выполнения ДЗ будем использовать minicube
+minikube start --kubernetes-version v1.24.0
+1. Установим CSI driver в класстер
+a) Выполним скрипт 
+install_snapshot_controller.sh
+b) Выполним сприпт, после клонирования репозитория на локальнкую машину
+https://github.com/kubernetes-csi/csi-driver-host-path/blob/master/deploy/kubernetes-1.24/deploy.sh
+2. Создаем StorageClass:
+kubectl apply -f storageclass.yaml
+3. Создаем pvc
+kubectl apply -f storage-pvc.yaml
+4. Создаем под, который будет использовать нашу pvc
+kubectl apply -f storage-pod.yaml
+5. Далаем port-forward и проверяем что nginx работает
+kubectl port-forward pods/web 8080:8000
+6. Создаем снапшот для pvc
+kubectl  apply -f csi-snapshot.yaml
+7. Создаем еще один pvc на основе snapshot
+8. Создаем еще один nginx на базе этой pvc
+kubectl apply -f storage-snapshot-pod.yaml
+9. Форвардим порты на вновь созданный под
+kubectl port-forward pods/web-snapshot 8080:8000
+Таким образом мы использовали snapshot для создания новой pvc. Те на основе snapshot построили темплейт pvc c данными. Данный кейс к примеру может быть удобен при быстром создание development-окружений с данными.
